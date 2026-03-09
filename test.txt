@@ -1,0 +1,19 @@
+mkdir test_links
+cd test_links
+
+echo hello > file.txt
+
+ln file.txt copy1.txt
+ln file.txt copy2.txt
+
+mkdir subdir
+ln file.txt subdir/copy3.txt
+
+ls -i
+ls -i subdir
+
+python3 script.py file.txt . // bash script.sh file.txt .
+
+ls
+ls subdir
+ls -l
