@@ -1,5 +1,3 @@
-#!/bin/bash
-
 file=$1
 dir=$2
 
