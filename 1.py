@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import os
 import sys
 
@@ -14,4 +12,5 @@ for root, dirs, files in os.walk(directory):
         inode2 = os.stat(path).st_ino
         if inode2 == inode and file2 != file:
             print("remove", path)
+
             os.remove(path)
