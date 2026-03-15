@@ -1,8 +1,23 @@
+#!/usr/bin/env python3
+
 import os
 import sys
+import argparse
 
-file = sys.argv[1]
-directory = sys.argv[2]
+parser = argparse.ArgumentParser(
+    description="Delete all hard links (synonyms) of FILE inside DIR and its subdirectories."
+)
+parser.add_argument("file", help="source file")
+parser.add_argument("directory", help="directory to search")
+args = parser.parse_args()
+file = args.file
+directory = args.directory
+if not os.path.isfile(file):
+    print(f"Error: file '{file}' does not exist")
+    sys.exit(2)
+if not os.path.isdir(directory):
+    print(f"Error: directory '{directory}' does not exist")
+    sys.exit(3)
 file = os.path.abspath(file)
 inode = os.stat(file).st_ino
 for root, dirs, files in os.walk(directory):
@@ -11,6 +26,5 @@ for root, dirs, files in os.walk(directory):
         file2 = os.path.abspath(path)
         inode2 = os.stat(path).st_ino
         if inode2 == inode and file2 != file:
-            print("remove", path)
-
+            print("deleting", path)
             os.remove(path)
