@@ -7,11 +7,14 @@ import argparse
 parser = argparse.ArgumentParser(
     description="Delete all hard links (synonyms) of FILE inside DIR and its subdirectories."
 )
-parser.add_argument("file", help="source file")
-parser.add_argument("directory", help="directory to search")
+parser.add_argument("-f", "--file", help="source file")
+parser.add_argument("-d", "--directory", help="directory to search")
 args = parser.parse_args()
 file = args.file
 directory = args.directory
+if not file or not directory:
+    parser.print_help()
+    sys.exit(1)
 if not os.path.isfile(file):
     print(f"Error: file '{file}' does not exist")
     sys.exit(2)
