@@ -4,13 +4,28 @@
 #include <windows.h>
 
 
+enum Colors {
+    RED,    //0
+    ORANGE, //1
+    YELLOW, //2
+    GREEN,  //3
+    BLUE,   //4
+    INDIGO, //5
+    VIOLET, //6
+    PINK,   //7
+    BROWN,  //8
+    WHITE,  //9
+    BLACK   //10
+};
+
 typedef struct Node {
-    int data, cnt;
+    enum Colors data;
+    int cnt;
     struct Node *left;
     struct Node *right;
 } Node;
 
-Node* createNode(int value) {
+Node* createNode(enum Colors value) {
     Node* newNode = (Node*)malloc(sizeof(Node));
     if (newNode == NULL)
         return NULL;
@@ -21,7 +36,8 @@ Node* createNode(int value) {
     return newNode;
 }
 
-Node* insert(Node* root, int value) {
+Node* addNode(Node* root, int val) {
+    enum Colors value = (enum Colors)val;
     if (root == NULL)
         return createNode(value);
     if (value < root->data) {
@@ -43,18 +59,19 @@ Node* findMinDepth(Node* node) {
     return current;
 }
 
-int findVal(Node* root, int value) {
+int findVal(Node* root, int val) {
+    enum Colors value = (enum Colors)val;
     if (root == NULL)
         return 0;
     if (root->data == value)
         return 1;
     if (value < root->data)
         return findVal(root->left, value);
-    else
-        return findVal(root->right, value);
+    return findVal(root->right, value);
 }
 
-Node* deleteNode(Node* root, int value) {
+Node* deleteNode(Node* root, int val) {
+    enum Colors value = (enum Colors)val;
     if (root == NULL)
         return root;
     if (value < root->data) {
@@ -83,11 +100,24 @@ Node* deleteNode(Node* root, int value) {
 }
 
 void printTree(Node* root, int level) {
+    char *color_names[] = {
+        "RED",
+        "ORANGE",
+        "YELLOW",
+        "GREEN",
+        "BLUE",
+        "INDIGO",
+        "VIOLET",
+        "PINK",
+        "BROWN",
+        "WHITE",
+        "BLACK"
+    };
     if (root == NULL)
         return;
     printTree(root->right, level + 1);
     for (int i = 0; i < level; i++) printf("----");
-    printf("%d (%d)\n", root->data, root->cnt);
+    printf("%s(%d)\n", color_names[root->data], root->cnt);
     printTree(root->left, level + 1);
 }
 
@@ -131,9 +161,13 @@ int main() {
         }
         switch (choice) {
             case 1:
-                printf("Введите число: ");
+                printf("Введите новую вершину (от 0 до 10): ");
                 scanf("%d", &val);
-                root = insert(root, val);
+                if (val < 0 || val > 10) {
+                    printf("Ошибка: число должно быть от 0 до 10\n");
+                    break;
+                }
+                root = addNode(root, val);
                 break;
             case 2:
                 val = getMinDepth(root);
@@ -149,13 +183,22 @@ int main() {
                     printf("Дерево пусто, удалять нечего!\n");
                     break;
                 }
-                printf("Какое число удалить:\n");
+                printf("Какое число удалить (от 0 до 10):\n");
                 scanf("%d", &val);
+                if (val < 0 || val > 10) {
+                    printf("Ошибка: число должно быть от 0 до 10\n");
+                    break;
+                }
                 if (!findVal(root, val)) {
                     printf("Такого значения в дереве нет!\n");
                 } else {
+                    if (val == root->data && root->cnt == 1) {
+                        printf("Удаление корня! Дерево удалено. Завершение программы. \n");
+                        freeTree(root);
+                        return 0;
+                    }
                     root = deleteNode(root, val);
-                    printf("Число удалено\n");
+                    printf("Цвет удален!\n");
                 }
                 break;
             case 4:
