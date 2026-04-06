@@ -41,9 +41,9 @@ Node* addNode(Node* root, int val) {
     if (root == NULL)
         return createNode(value);
     if (value < root->data) {
-        root->left = insert(root->left, value);
+        root->left = addNode(root->left, value);
     } else if (value > root->data) {
-        root->right = insert(root->right, value);
+        root->right = addNode(root->right, value);
     }
     else {
         root->cnt++;
