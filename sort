@@ -1,0 +1,210 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX_SIZE 100
+
+typedef struct {
+    int key;
+    int value;
+} data_type;
+
+typedef struct {
+    data_type data[MAX_SIZE];
+    int front;
+    int back;
+    int size;
+} udt;
+
+void udt_create(udt *d) {
+    d->front = 0;
+    d->back = -1;
+    d->size = 0;
+}
+
+bool udt_is_empty(const udt *d) {
+    return d->size == 0;
+}
+
+void udt_push_back(udt *d, data_type elem) {
+    if (d->size == MAX_SIZE)
+    {
+        printf("Дек переполнен\n");
+        return;
+    }
+    d->back = (d->back + 1) % MAX_SIZE;
+    d->data[d->back] = elem;
+    d->size++;
+}
+
+void udt_push_front(udt *d, data_type elem) {
+    if (d->size == MAX_SIZE)
+    {
+        printf("Дек переполнен\n");
+        return;
+    }
+
+    d->front = (d->front - 1 + MAX_SIZE) % MAX_SIZE;
+    d->data[d->front] = elem;
+    d->size++;
+
+    if (d->size == 1)
+        d->back = d->front;
+}
+
+void udt_pop_front(udt *d) {
+    if (udt_is_empty(d))
+    {
+        printf("Дек пуст\n");
+        return;
+    }
+    d->front = (d->front + 1) % MAX_SIZE;
+    d->size--;
+}
+
+void udt_pop_back(udt *d) {
+    if (udt_is_empty(d))
+    {
+        printf("Дек пуст\n");
+        return;
+    }
+    d->back = (d->back - 1 + MAX_SIZE) % MAX_SIZE;
+    d->size--;
+}
+
+void udt_print(const udt *d) {
+    int i;
+    printf("Дек: ");
+    for (i = 0; i < d->size; i++) {
+        int index = (d->front + i) % MAX_SIZE;
+        printf("(%d,%d) ", d->data[index].key, d->data[index].value);
+    }
+
+}
+
+void deque_to_array(const udt *d, data_type arr[]) {
+    int i;
+    for (i = 0; i < d->size; i++) {
+        int index = (d->front + i) % MAX_SIZE;
+        arr[i] = d->data[index];
+    }
+}
+
+
+void array_to_deque(udt *d, data_type arr[], int n)
+{
+    int i;
+    udt_create(d);
+    for (i = 0; i < n; i++) {
+        udt_push_back(d, arr[i]);
+    }
+}
+
+// слияние двух частей массива
+void merge(data_type arr[], int left, int mid, int right) {
+    int i = left;
+    int j = mid + 1;
+    int k = 0;
+
+    data_type temp[MAX_SIZE];
+    while (i <= mid && j <= right) {
+        if (arr[i].key <= arr[j].key)
+            temp[k++] = arr[i++];
+        else
+            temp[k++] = arr[j++];
+    }
+    while (i <= mid)
+        temp[k++] = arr[i++];
+    while (j <= right)
+        temp[k++] = arr[j++];
+    for (i = left, k = 0; i <= right; i++, k++)
+        arr[i] = temp[k];
+}
+
+void merge_sort(data_type arr[], int left, int right) {
+    if (left < right)
+    {
+        int mid = (left + right) / 2;
+        merge_sort(arr, left, mid);
+        merge_sort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+}
+
+void udt_sort(udt *d) {
+    data_type arr[MAX_SIZE];
+    deque_to_array(d, arr);
+    merge_sort(arr, 0, d->size - 1);
+    array_to_deque(d, arr, d->size);
+}
+
+void merge_deques(const udt *d1, const udt *d2, udt *result) {
+    int i = 0;
+    int j = 0;
+    udt_create(result);
+    while (i < d1->size && j < d2->size) {
+        int idx1 = (d1->front + i) % MAX_SIZE;
+        int idx2 = (d2->front + j) % MAX_SIZE;
+        if (d1->data[idx1].key <= d2->data[idx2].key) {
+            udt_push_back(result, d1->data[idx1]);
+            i++;
+        }
+        else {
+            udt_push_back(result, d2->data[idx2]);
+            j++;
+        }
+    }
+    while (i < d1->size) {
+        int idx1 = (d1->front + i) % MAX_SIZE;
+        udt_push_back(result, d1->data[idx1]);
+        i++;
+    }
+    while (j < d2->size) {
+        int idx2 = (d2->front + j) % MAX_SIZE;
+        udt_push_back(result, d2->data[idx2]);
+        j++;
+    }
+}
+
+int main() {
+    udt d1, d2, result;
+
+    int n1, n2;
+    int i;
+    udt_create(&d1);
+    udt_create(&d2);
+    printf("Введите количество элементов первого дека: ");
+    scanf("%d", &n1);
+    printf("Введите key и value для первого дека:\n");
+    for (i = 0; i < n1; i++) {
+        data_type temp;
+        printf("Элемент %d: ", i + 1);
+        scanf("%d %d", &temp.key, &temp.value);
+        udt_push_back(&d1, temp);
+    }
+
+    printf("\nВведите количество элементов второго дека: ");
+    scanf("%d", &n2);
+    printf("Введите key и value для второго дека:\n");
+    for (i = 0; i < n2; i++) {
+        data_type temp;
+        printf("Элемент %d: ", i + 1);
+        scanf("%d %d", &temp.key, &temp.value);
+        udt_push_back(&d2, temp);
+    }
+    printf("\nПервый дек:\n");
+    udt_print(&d1);
+    printf("Второй дек:\n");
+    udt_print(&d2);
+    udt_sort(&d1);
+    udt_sort(&d2);
+    printf("\nПосле сортировки:\n");
+    printf("Первый дек:\n");
+    udt_print(&d1);
+    printf("Второй дек:\n");
+    udt_print(&d2);
+    merge_deques(&d1, &d2, &result);
+    printf("\nРезультат слияния:\n");
+    udt_print(&result);
+    return 0;
+}
